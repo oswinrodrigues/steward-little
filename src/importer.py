@@ -68,10 +68,12 @@ def import_tangerine(filenames, master):
                 master.append([date, new_amount, description])
     return master
 
+MASTER_DATABASE = "data/master.csv"
+
 def write_master_transactions(master):
     path = os.getcwd().split("steward-little")[0]
-    destination = path + "steward-little/data/master.csv"
-    fields = ['Date', 'Amount', 'Description']
+    destination = path + "steward-little/" + MASTER_DATABASE
+    fields = ['date', 'amount', 'description']
     with open(destination, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(fields)
