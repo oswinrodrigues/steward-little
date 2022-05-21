@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import importer
+import categorizer
 
 import os
 import csv
@@ -46,14 +47,14 @@ def display_month_expenses(month, year):
         print('No expenses found for {} {}.'.format(month_string, year))
 
 if __name__ == "__main__":
-    #importer.import_all_transactions()
-
     if len(sys.argv) == 1:
         month = datetime.now().month
     else:
         # TODO: verify input
         month = int(sys.argv[1])
-
     year = datetime.now().year
+
+    importer.import_all_transactions()
+    categorizer.categorize_expenses()
 
     display_month_expenses(month, year)
