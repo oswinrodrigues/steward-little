@@ -1,5 +1,5 @@
 # steward-little
-My money don't jiggle, jiggle. It folds.
+> "My money don't jiggle, jiggle. It folds." - Louis Theroux
 
 An automated expense tracker for personal finance stewardship. Here's how it works:
 1. Read all bank and credit card statements (CSV) from `data/`.
