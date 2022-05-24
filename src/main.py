@@ -1,67 +1,59 @@
 #!/usr/bin/env python3
 
-import importer
 import categorizer
-
-import os
-import csv
+import importer
 import sys
 
-import calendar
+from calendar import month_name
 from datetime import datetime
 
-RESULTS_FILE = "data/master_categorized.csv"
+def is_month_valid(input):
+    try:
+        month = int(input)
+    except ValueError:
+        print("Please input a valid month index [1-12].")
+        return False
 
-def display_month_expenses(month, year):
-    categories = categorizer.get_categories()
-    sums = {key: 0.00 for key in categories}
-    entries = {key: [] for key in categories}
+    if (month < 1 or month > 12):
+        print("Please input a valid month index [1-12].")
+        return False
 
-    path = os.getcwd().split("steward-little")[0]
-    destination = path + "steward-little/" + RESULTS_FILE
-    at_least_one_entry = False
+    return True
 
-    with open(destination, 'r') as file:
-            reader = csv.reader(file)
-            next(reader, None) # Skip header
+def is_year_valid(input):
+    try:
+        year = int(input)
+    except ValueError:
+        print("Please input a valid year.")
+        return False
 
-            for lines in reader:
-                date = lines[0].split('/')
-                entry_month = int(date[0])
-                entry_year = int(date[2])
-                if (entry_month != month) or (entry_year != year):
-                    continue
+    if (year < 1):
+        print("Please input a valid year.")
+        return False
 
-                at_least_one_entry = True
-                category = lines[3]
-                amount = float(lines[1])
-                sums[category] += amount
-                entries[category].append(lines)
-
-    month_string = calendar.month_name[month]
-    if (at_least_one_entry == True):
-        print(month_string.upper(), year)
-        for c in categories:
-            # TODO: fix formatting of total amounts
-            print(' {}: ${}'.format(c, sums[c]))
-            #for entry in entries[c]:
-            #    print('    {} ${}\t{}'.format(entry[0], entry[1], entry[2]))
-    else:
-        print('No expenses found for {} {}.'.format(month_string, year))
+    return True
 
 if __name__ == "__main__":
-    year = datetime.now().year
     month = datetime.now().month
-
-    # TODO: verify input
+    month_valid = True
     if len(sys.argv) > 1:
-        month = int(sys.argv[1])
+        if is_month_valid(sys.argv[1]) == True:
+            month = int(sys.argv[1])
+        else:
+            month_valid = False
+
+    year = datetime.now().year
+    year_valid = True
     if len(sys.argv) > 2:
-        year = int(sys.argv[2])
+        if is_year_valid(sys.argv[2]) == True:
+            year = int(sys.argv[2])
+        else:
+            year_valid = False
 
-    importer.import_all_transactions()
-    # TODO: master_categorized.csv gains duplicates as main.py is run multiple
-    # times. Need solution for this.
-    categorizer.categorize_expenses()
+    if (month_valid == True) and (year_valid == True):
+        destination = "data/{}{}.csv".format(month_name[month].lower(), year)
 
-    display_month_expenses(month, year)
+        importer.import_all_transactions(month, year)
+        categorizer.categorize_expenses(destination)
+
+        print("Categorized transactions for {} {} stored in {}".format(month_name[month], year, destination))

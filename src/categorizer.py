@@ -2,9 +2,10 @@ import csv
 import os
 
 CATEGORY_PATH = "data/categories"
+RAW_DATABASE = "data/raw.csv"
 
 def get_categories():
-    return [file.split('.')[0] for file in os.listdir(CATEGORY_PATH)]
+    return [file.split(".")[0] for file in os.listdir(CATEGORY_PATH)]
 
 def find_category(description):
     for category in get_categories():
@@ -34,13 +35,13 @@ def add_to_category(description, category):
     with open(f"{CATEGORY_PATH}/{category}.txt", "a+") as file:
         file.write(description + "\n")
 
-MASTER_DATABASE = "data/master.csv"
-RESULTS_FILE = "data/master_categorized.csv"
-
-def categorize_expenses():
-    with open(MASTER_DATABASE, "r") as file:
+def categorize_expenses(destination):
+    with open(RAW_DATABASE, "r") as file:
         reader = csv.DictReader(file)
-        next(reader, None) # Skip header
+
+        with open(destination, "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["date", "amount", "bank", "description", "category"])
 
         for row in reader:
             amount = row["amount"]
@@ -52,6 +53,7 @@ def categorize_expenses():
 
             row["category"] = category
 
-            with open(RESULTS_FILE, "a") as results:
+            with open(destination, "a") as results:
                 writer = csv.DictWriter(results, fieldnames=row.keys())
                 writer.writerow(row)
+
