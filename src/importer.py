@@ -11,7 +11,7 @@ def date_within_range(date, month, year):
     return (entry_month == month) and (entry_year == year)
 
 def get_filenames(institution):
-    return [f for f in glob.glob("data/" + institution + "/*.csv")]
+    return [f for f in glob.glob("data/" + institution + "/*.[c|C][s|S][v|V]")]
 
 def import_amex(f, month, year):
     with open(f, "r") as file:
