@@ -4,9 +4,9 @@ import csv
 RAW_DATABASE = "data/raw.csv"
 
 def date_within_range(date, month, year):
-    split_date = date.split("/")
-    entry_month = int(split_date[0])
-    entry_year = int(split_date[2])
+    split_date = date.split("-")
+    entry_month = int(split_date[1])
+    entry_year = int(split_date[0])
 
     return (entry_month == month) and (entry_year == year)
 
@@ -18,7 +18,8 @@ def import_amex(f, month, year):
         reader = csv.reader(file)
 
         for lines in reader:
-            date = lines[0]
+            date = lines[0].split("/")
+            date = date[2] + "-" + date[0] + "-" + date[1]
             amount = lines[2].strip()
             description = lines[3]
 
@@ -40,8 +41,7 @@ def import_rogers(f, month, year):
         next(reader, None) # Skip header
 
         for lines in reader:
-            date = lines[0].split("-")
-            date = date[1] + "/" + date[2] + "/" + date[0]
+            date = lines[0]
             amount = lines[11].replace("$", "")
             description = lines[7]
 
@@ -63,7 +63,8 @@ def import_tangerine(f, month, year):
         next(reader, None) # Skip header
 
         for lines in reader:
-            date = lines[0]
+            date = lines[0].split("/")
+            date = date[2] + "-" + date[0].zfill(2) + "-" + date[1].zfill(2)
             amount = lines[4]
             # Not interested in tracking income for the time being.
             if float(amount) >= 0:
