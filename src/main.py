@@ -71,7 +71,7 @@ if __name__ == "__main__":
             break
 
     if (input_valid == True):
-        destination = "data/{}{}.csv".format(month_name[month].lower(), year)
+        destination = "data/expenses/{}{}.csv".format(month_name[month].lower(), year)
 
         importer.import_all_transactions(month, year)
         totals = categorizer.categorize_expenses(destination)
