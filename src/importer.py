@@ -1,6 +1,8 @@
 import glob
 import csv
 
+from datetime import datetime
+
 RAW_DATABASE = "data/raw.csv"
 
 def date_within_range(date, month, year):
@@ -13,15 +15,23 @@ def date_within_range(date, month, year):
 def get_filenames(institution):
     return [f for f in glob.glob("data/" + institution + "/*.[c|C][s|S][v|V]")]
 
-def import_amex(f, month, year):
+def import_amex(f, month, year, format):
     with open(f, "r") as file:
         reader = csv.reader(file)
+        if (format == "new"):
+            next(reader, None) # Skip header
 
         for lines in reader:
-            date = lines[0].split("/")
-            date = date[2] + "-" + date[0] + "-" + date[1]
-            amount = lines[2].strip()
-            description = lines[3]
+            if (format == "old"):
+                date = lines[0].split("/")
+                date = date[2] + "-" + date[0] + "-" + date[1]
+                amount = lines[2].strip()
+                description = lines[3]
+            else:
+                date = lines[0].split(" ")
+                date = date[2] + "-" + str(datetime.strptime(date[1], '%b').month) + "-" + date[0]
+                amount = lines[5].strip()
+                description = lines[2]
 
             if date_within_range(date, month, year) == False:
                 continue
@@ -41,8 +51,10 @@ def import_rogers(f, month, year):
         next(reader, None) # Skip header
 
         for lines in reader:
+            if lines == []:
+                continue
+
             date = lines[0]
-            amount = lines[11].replace("$", "")
             description = lines[7]
 
             if date_within_range(date, month, year) == False:
@@ -51,6 +63,11 @@ def import_rogers(f, month, year):
             # Do not double count credit card expenses.
             if "AUTO PAYMENT" in description or "CashBack" in description:
                 continue
+
+            if (year < 2023):
+                amount = lines[11].replace("$", "")
+            else:
+                amount = lines[12].replace("$", "")
 
             with open(RAW_DATABASE, "a") as file:
                 writer = csv.writer(file)
@@ -93,8 +110,10 @@ def import_all_transactions(month, year):
         writer = csv.writer(file)
         writer.writerow(["date", "amount", "bank", "description"])
 
-    for file in get_filenames("amex"):
-        import_amex(file, month, year)
+    for file in get_filenames("amex-old-format"):
+        import_amex(file, month, year, "old")
+    for file in get_filenames("amex-new-format"):
+        import_amex(file, month, year, "new")
     for file in get_filenames("rogers"):
         import_rogers(file, month, year)
     for file in get_filenames("tangerine"):
