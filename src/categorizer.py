@@ -19,8 +19,7 @@ def request_category(description, amount):
     enumeration = {i: c for i, c in enumerate(get_categories())}
 
     print(f"Please specify a category for: {description} (${amount})")
-    print(f"Either enter a number for an existing category: \n{enumeration}")
-    print("Or enter a new category name to be added to the list!")
+    print(f"Either enter a number for an existing category or enter a new category name to be added to the list. \n{enumeration}")
 
     selection = input("Enter selection: ")
     try:
@@ -36,6 +35,8 @@ def add_to_category(description, category):
         file.write(description + "\n")
 
 def categorize_expenses(destination):
+    totals = dict.fromkeys(get_categories(), float(0))
+
     with open(RAW_DATABASE, "r") as file:
         reader = csv.DictReader(file)
 
@@ -52,8 +53,13 @@ def categorize_expenses(destination):
                 add_to_category(description, category)
 
             row["category"] = category
+            totals[category] += float(amount)
 
             with open(destination, "a") as results:
                 writer = csv.DictWriter(results, fieldnames=row.keys())
                 writer.writerow(row)
 
+    for category, sum in totals.items():
+        totals[category] = int(round(sum))
+
+    return totals

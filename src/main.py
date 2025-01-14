@@ -3,6 +3,7 @@
 import categorizer
 import importer
 import publisher
+import summarizer
 import sys
 
 from calendar import month_name
@@ -73,10 +74,15 @@ if __name__ == "__main__":
         destination = "data/{}{}.csv".format(month_name[month].lower(), year)
 
         importer.import_all_transactions(month, year)
-        categorizer.categorize_expenses(destination)
+        totals = categorizer.categorize_expenses(destination)
 
         if (output == "csv"):
+            # Change "w"rite mode to "a"ppend mode if you want to build a summary for the year
+            summarizer.summarize_expenses(month, year, totals, "w")
             print("Categorized transactions for {} {} written to {}".format(month_name[month], year, destination))
+            print("Summarized transactions for {} {} written to data/summary.csv".format(month_name[month], year))
+            print()
         else:
             publisher.publish_transactions(destination)
             print("Categorized transactions for {} {} published to Notion!".format(month_name[month], year))
+            print()
