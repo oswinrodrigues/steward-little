@@ -61,7 +61,7 @@ def import_rogers(f, month, year):
                 continue
 
             # Do not double count credit card expenses.
-            if "AUTO PAYMENT" in description or "CashBack" in description:
+            if "PAYMENT" in description or "CashBack" in description:
                 continue
 
             if (year < 2023):

@@ -51,6 +51,7 @@ def categorize_expenses(destination):
             if category is None:
                 category = request_category(description, amount)
                 add_to_category(description, category)
+                totals[category] = 0
 
             row["category"] = category
             totals[category] += float(amount)
