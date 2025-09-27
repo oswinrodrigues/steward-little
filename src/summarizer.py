@@ -5,7 +5,7 @@ SUMMARY_DATABASE = "data/summary.csv"
 def summarize_expenses(month, year, dictionary, mode):
     # Hard code the order of the categories as they are in my spreadsheet
     # TODO: this will miss any new categories added - is there a better way to implement custom ordering?
-    sorted_keys = ["giving", "saving", "rent", "utilities", "insurance", "recurring", "groceries", "transport", "health", "misc", "home", "restaurants", "relationships", "clothing", "recreation", "travel"]
+    sorted_keys = ["giving", "saving", "rent", "utilities", "insurance", "recurring", "groceries", "transport", "health", "misc", "home", "restaurants", "relationships", "clothing", "travel"]
 
     with open(SUMMARY_DATABASE, mode) as file:
         writer = csv.writer(file)
