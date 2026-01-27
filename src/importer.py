@@ -83,12 +83,19 @@ def import_tangerine(f, month, year):
             date = lines[0].split("/")
             date = date[2] + "-" + date[0].zfill(2) + "-" + date[1].zfill(2)
             amount = lines[4]
+            description = lines[2] + " " + lines[3]
+
             # Not interested in tracking income for the time being.
             if float(amount) >= 0:
-                continue
-            amount = amount[1:]
-            # In rare cases, the Memo in column 3 provides necessary information.
-            description = lines[2] + " " + lines[3]
+                # However, we do want to include cancelled etransfers so it zeroes out the expense.
+                if "Cancelled INTERAC e-Transfer" not in description:
+                    continue
+                # We are going to record expenses as positive numbers, so income needs to be negative.
+                else:
+                    amount = "-" + amount
+            else:
+                # Remove the negative sign from the expense.
+                amount = amount[1:]
 
             if date_within_range(date, month, year) == False:
                 continue
