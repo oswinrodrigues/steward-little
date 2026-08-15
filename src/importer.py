@@ -15,6 +15,11 @@ def date_within_range(date, month, year):
 def get_filenames(institution):
     return [f for f in glob.glob("data/" + institution + "/*.[c|C][s|S][v|V]")]
 
+def write_to_raw(date, amount, source, description):
+    with open(RAW_DATABASE, "a") as file:
+        writer = csv.writer(file)
+        writer.writerow([date, amount, source, description.upper()])
+
 def import_amex(f, month, year, format):
     with open(f, "r") as file:
         reader = csv.reader(file)
@@ -40,10 +45,7 @@ def import_amex(f, month, year, format):
             if "PAYMENT RECEIVED" in description:
                 continue
 
-            with open(RAW_DATABASE, "a") as file:
-                writer = csv.writer(file)
-                row = [date, amount, "amex", description.upper()]
-                writer.writerow(row)
+            write_to_raw(date, amount, "amex", description)
 
 def import_rogers(f, month, year):
     with open(f, "r") as file:
@@ -69,10 +71,7 @@ def import_rogers(f, month, year):
             else:
                 amount = lines[12].replace("$", "")
 
-            with open(RAW_DATABASE, "a") as file:
-                writer = csv.writer(file)
-                row = [date, amount, "rogers", description.upper()]
-                writer.writerow(row)
+            write_to_raw(date, amount, "rogers", description)
 
 def import_tangerine(f, month, year):
     with open(f, "r") as file:
@@ -107,10 +106,53 @@ def import_tangerine(f, month, year):
             if "Reversal" in description:
                 continue
 
-            with open(RAW_DATABASE, "a") as file:
-                writer = csv.writer(file)
-                row = [date, amount, "tangerine", description.upper()]
-                writer.writerow(row)
+            write_to_raw(date, amount, "tangerine", description)
+
+def import_wealthsimple_chequing(f, month, year):
+    with open(f, "r") as file:
+        reader = csv.reader(file)
+        next(reader, None) # Skip header
+
+        for lines in reader:
+            date = lines[0]
+            amount = lines[3]
+            description = lines[2]
+
+            # Not interested in tracking income for the time being.
+            if float(amount) >= 0:
+                continue
+            else:
+                # Remove the negative sign from the expense.
+                amount = amount[1:]
+
+            if date_within_range(date, month, year) == False:
+                continue
+
+            # Do not double count credit card expenses.
+            if "XXX" in description: # TODO: not sure yet how the credit card payment will be described
+                continue
+
+            write_to_raw(date, amount, "wealthsimple-chequing", description)
+
+def import_wealthsimple_credit(f, month, year):
+    with open(f, "r") as file:
+        reader = csv.reader(file)
+        next(reader, None) # Skip header
+
+        for lines in reader:
+            date = lines[0]
+            amount = lines[4]
+            description = lines[3]
+
+            if date_within_range(date, month, year) == False:
+                continue
+
+            # Do not double count credit card expenses.
+            if "PAYMENT RECEIVED" in description: # TODO: not sure yet how the credit card payment will be described
+                continue
+
+            write_to_raw(date, amount, "wealthsimple-credit", description)
+
 
 def import_all_transactions(month, year):
     with open(RAW_DATABASE, "w") as file:
@@ -125,3 +167,7 @@ def import_all_transactions(month, year):
         import_rogers(file, month, year)
     for file in get_filenames("tangerine"):
         import_tangerine(file, month, year)
+    for file in get_filenames("wealthsimple-chequing"):
+        import_wealthsimple_chequing(file, month, year)
+    for file in get_filenames("wealthsimple-credit"):
+        import_wealthsimple_credit(file, month, year)
