@@ -34,7 +34,7 @@ def import_amex(f, month, year, format):
                 description = lines[3]
             else:
                 date = lines[0].split(" ")
-                date = date[2] + "-" + str(datetime.strptime(date[1], '%b').month) + "-" + date[0]
+                date = date[2] + "-" + str(datetime.strptime(date[1], '%b').month).zfill(2) + "-" + date[0]
                 amount = lines[5].strip()
                 description = lines[2]
 
